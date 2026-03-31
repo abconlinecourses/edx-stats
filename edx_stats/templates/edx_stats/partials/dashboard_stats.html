@@ -16,3 +16,27 @@
         <div class="stats-label">Total Users</div>
     </div>
 </div>
+<div class="col-md-4">
+    <div class="card stats-card">
+        <div class="stats-number">{{ total_countries|default:"0" }}</div>
+        <div class="stats-label">Countries Reached</div>
+    </div>
+</div>
+<div class="col-md-4">
+    <div class="card stats-card">
+        <div class="stats-number">{{ is_upcoming|default:"0" }}</div>
+        <div class="stats-label">Upcoming Courses</div>
+    </div>
+</div>
+<div class="col-md-4">
+    <div class="card stats-card">
+        <div class="stats-number">{{ is_ongoing|default:"0" }}</div>
+        <div class="stats-label">Ongoing Courses</div>
+    </div>
+</div>
+<div class="col-md-4">
+    <div class="card stats-card">
+        <div class="stats-number">{{ is_finished|default:"0" }}</div>
+        <div class="stats-label">Finished Courses</div>
+    </div>
+</div>

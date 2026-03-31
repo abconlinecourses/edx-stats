@@ -6,12 +6,13 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, get_user_model
-from django.db.models import Count
+from django.db.models import Count, Q
 from django.db.models.functions import ExtractYear
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
 from common.djangoapps.student.models import CourseEnrollment, UserProfile
 from openedx.core.djangoapps.site_configuration import helpers as configuration_helpers
 from django.conf import settings
+from django.utils import timezone
 
 from . import cache
 
@@ -26,6 +27,33 @@ class StaffRequiredMixin:
         return super().dispatch(request, *args, **kwargs)
 
 
+def _resolve_country_name(country_code):
+    """Resolve a human-readable country name from a stored country code."""
+    code = str(country_code or '').strip()
+    if not code:
+        return ''
+
+    normalized_code = code.upper()
+
+    # Primary path: choices configured on the UserProfile country field.
+    country_field = UserProfile._meta.get_field('country')
+    country_names = dict(getattr(country_field, 'flatchoices', []) or getattr(country_field, 'choices', []) or [])
+    name = country_names.get(normalized_code)
+    if name:
+        return str(name)
+
+    # Optional fallback when django-countries is available in runtime.
+    try:
+        from django_countries import countries as django_countries_registry
+        fallback_name = django_countries_registry.name(normalized_code)
+        if fallback_name:
+            return str(fallback_name)
+    except Exception:  # pragma: no cover - defensive fallback
+        pass
+
+    return code
+
+
 def get_course_stats():
     """Get course statistics."""
     return CourseOverview.objects.annotate(
@@ -35,7 +63,7 @@ def get_course_stats():
 
 def get_country_stats():
     """Get country statistics."""
-    return UserProfile.objects.exclude(
+    stats = UserProfile.objects.exclude(
         country__isnull=True
     ).exclude(
         country=''
@@ -44,6 +72,13 @@ def get_country_stats():
     ).annotate(
         user_count=Count('user')
     ).order_by('-user_count')
+    return [
+        {
+            **row,
+            'country_name': _resolve_country_name(row['country'])
+        }
+        for row in stats
+    ]
 
 
 def get_yearly_stats():
@@ -92,11 +127,30 @@ def get_total_stats():
     logger.debug(f"CourseOverview.objects.count(): {CourseOverview.objects.count()}")
     logger.debug(f"CourseEnrollment.objects.count(): {CourseEnrollment.objects.count()}")
     logger.debug(f"User.objects.count(): {User.objects.count()}")
+    total_countries = UserProfile.objects.exclude(
+        country__isnull=True
+    ).exclude(
+        country=''
+    ).values('country').distinct().count()
     return {
         'total_courses': CourseOverview.objects.count(),
         'total_enrollments': CourseEnrollment.objects.count(),
         'total_users': User.objects.count(),
+        'total_countries': total_countries,
     }
+
+
+def get_course_lifecycle_stats():
+    """Get course lifecycle counts using program-detail status logic."""
+    now = timezone.now()
+    return CourseOverview.objects.aggregate(
+        is_finished=Count('id', filter=Q(end__isnull=False, end__lt=now)),
+        is_upcoming=Count('id', filter=Q(start__isnull=False, start__gt=now)),
+        is_ongoing=Count(
+            'id',
+            filter=Q(start__isnull=False, start__lt=now) & (Q(end__isnull=True) | Q(end__gt=now))
+        ),
+    )
 
 
 class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
@@ -113,7 +167,7 @@ class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         )
 
         country_stats = cache.get_cached_stats(
-            cache.get_cache_key('country_stats_top'),
+            cache.get_cache_key('country_stats_top_v2'),
             lambda: list(get_country_stats()[:10])
         )
 
@@ -123,8 +177,13 @@ class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         )
 
         total_stats = cache.get_cached_stats(
-            cache.get_cache_key('total_stats'),
+            cache.get_cache_key('total_stats_v2'),
             get_total_stats
+        )
+
+        course_lifecycle_stats = cache.get_cached_stats(
+            cache.get_cache_key('course_lifecycle_stats'),
+            get_course_lifecycle_stats
         )
 
         context.update({
@@ -132,6 +191,7 @@ class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             'country_stats': country_stats,
             'yearly_stats': yearly_stats,
             **total_stats,
+            **course_lifecycle_stats,
             'platform_name': configuration_helpers.get_value('PLATFORM_NAME', settings.PLATFORM_NAME),
         })
 
@@ -159,7 +219,7 @@ class CountryListView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['countries'] = cache.get_cached_stats(
-            cache.get_cache_key('country_stats_all'),
+            cache.get_cache_key('country_stats_all_v2'),
             lambda: list(get_country_stats())
         )
         context['platform_name'] = configuration_helpers.get_value('PLATFORM_NAME', settings.PLATFORM_NAME)
