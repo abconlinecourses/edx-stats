@@ -12,33 +12,169 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
+        :root {
+            --unesco-blue: #005a9c;
+            --surface: #ffffff;
+            --surface-muted: #f7f9fb;
+            --border-subtle: #d8dee6;
+            --text-primary: #1f2933;
+            --text-muted: #52606d;
+        }
+
+        body {
+            background-color: var(--surface-muted);
+            color: var(--text-primary);
+        }
+
         .sidebar {
             min-height: 100vh;
-            background-color: #f8f9fa;
-            padding-top: 20px;
+            background-color: var(--surface);
+            border-right: 1px solid var(--border-subtle);
+            padding: 24px 16px;
         }
 
         .main-content {
-            padding: 20px;
+            padding: 28px 32px;
+        }
+
+        .page-title {
+            margin: 0;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .page-subtitle {
+            margin: 6px 0 0 0;
+            color: var(--text-muted);
+            font-size: 0.95rem;
         }
 
         .card {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-subtle);
+            border-radius: 10px;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+
+        .card-header {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border-subtle);
+            font-weight: 600;
         }
 
         .stats-card {
             text-align: center;
-            padding: 15px;
+            min-height: 138px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            padding: 34px 14px 16px 14px;
+            position: relative;
+            overflow: visible;
         }
 
         .stats-number {
-            font-size: 2.5rem;
-            font-weight: bold;
+            font-size: 2.15rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            line-height: 1.1;
+            margin-top: 4px;
         }
 
         .stats-label {
-            font-size: 1rem;
-            color: #6c757d;
+            margin-top: 6px;
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            letter-spacing: 0.01em;
+            min-height: 2.5em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .stats-icon {
+            width: 46px;
+            height: 46px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 999px;
+            background: #edf4fb;
+            color: var(--unesco-blue);
+            border: 1px solid #d7e5f3;
+            position: absolute;
+            left: 50%;
+            top: 0;
+            transform: translate(-50%, -50%);
+        }
+
+        .stats-icon svg {
+            width: 21px;
+            height: 21px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .list-group-item {
+            border: 0;
+            border-left: 3px solid transparent;
+            border-radius: 0;
+            color: var(--text-primary);
+            padding: 10px 12px;
+        }
+
+        .list-group-item:hover {
+            background: #f2f6fa;
+            color: var(--text-primary);
+        }
+
+        .list-group-item.active {
+            background: #edf4fb;
+            color: var(--unesco-blue);
+            border-left-color: var(--unesco-blue);
+            font-weight: 600;
+        }
+
+        .table {
+            margin-bottom: 0;
+            color: var(--text-primary);
+        }
+
+        .table thead th {
+            border-bottom: 1px solid var(--border-subtle);
+            color: var(--text-muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .table tbody td {
+            border-color: #e8edf2;
+            vertical-align: middle;
+        }
+
+        .metric-cell {
+            text-align: right;
+            font-variant-numeric: tabular-nums;
+            font-weight: 600;
+        }
+
+        .code-cell {
+            color: var(--text-muted);
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+            font-size: 0.9rem;
+        }
+
+        .insight-note {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 14px;
         }
     </style>
 </head>
@@ -47,7 +183,7 @@
         <div class="row">
             <!-- Sidebar -->
             <div class="col-md-2 sidebar">
-                <h3 class="text-center mb-4">{{platform_name}} Stats</h3>
+                <h3 class="h5 text-center mb-4">{{platform_name}} Stats</h3>
                 <div class="list-group">
                     <a href="{% url 'edx_stats:dashboard' %}" class="list-group-item list-group-item-action {% if request.path == '/stats/' %}active{% endif %}">
                         Dashboard
@@ -67,7 +203,7 @@
             <!-- Main Content -->
             <div class="col-md-10 main-content">
                 <div class="d-flex justify-content-between align-items-center mb-4">
-                    <h1>{% block header %}{{platform_name}} Statistics{% endblock %}</h1>
+                    <h1 class="page-title">{% block header %}{{platform_name}} Statistics{% endblock %}</h1>
                 </div>
 
                 {% block content %}{% endblock %}

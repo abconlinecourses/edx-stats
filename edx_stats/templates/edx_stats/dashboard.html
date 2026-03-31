@@ -5,8 +5,14 @@
 {% block header %}Dashboard{% endblock %}
 
 {% block content %}
+    <p class="page-subtitle">Learner reach and course activity overview.</p>
+    <p class="insight-note">
+        Last updated:
+        <strong>{{ dashboard_last_updated|date:"M d, Y H:i" }}</strong>
+    </p>
+
     <!-- Summary Stats -->
-    <div class="row" id="dashboard-stats">
+    <div class="row g-4 mt-1" id="dashboard-stats">
         {% include 'edx_stats/partials/dashboard_stats.html' %}
     </div>
 

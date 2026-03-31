@@ -6,6 +6,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, get_user_model
+from django.apps import apps
 from django.db.models import Count, Q
 from django.db.models.functions import ExtractYear
 from openedx.core.djangoapps.content.course_overviews.models import CourseOverview
@@ -127,16 +128,38 @@ def get_total_stats():
     logger.debug(f"CourseOverview.objects.count(): {CourseOverview.objects.count()}")
     logger.debug(f"CourseEnrollment.objects.count(): {CourseEnrollment.objects.count()}")
     logger.debug(f"User.objects.count(): {User.objects.count()}")
+    now = timezone.now()
     total_countries = UserProfile.objects.exclude(
         country__isnull=True
     ).exclude(
         country=''
     ).values('country').distinct().count()
+    running_programs = 0
+    total_partners = 0
+    try:
+        UnescoProgram = apps.get_model('unesco_programs', 'UnescoProgram')
+        running_programs = UnescoProgram.objects.filter(
+            courses__start__isnull=False,
+            courses__start__lt=now
+        ).filter(
+            Q(courses__end__isnull=True) | Q(courses__end__gt=now)
+        ).distinct().count()
+    except LookupError:
+        logger.warning("unesco_programs.UnescoProgram model not available; defaulting running_programs to 0")
+
+    try:
+        Organization = apps.get_model('organizations', 'Organization')
+        total_partners = Organization.objects.filter(active=True).count()
+    except LookupError:
+        logger.warning("organizations.Organization model not available; defaulting total_partners to 0")
+
     return {
         'total_courses': CourseOverview.objects.count(),
         'total_enrollments': CourseEnrollment.objects.count(),
         'total_users': User.objects.count(),
         'total_countries': total_countries,
+        'running_programs': running_programs,
+        'total_partners': total_partners,
     }
 
 
@@ -177,7 +200,7 @@ class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
         )
 
         total_stats = cache.get_cached_stats(
-            cache.get_cache_key('total_stats_v2'),
+            cache.get_cache_key('total_stats_v4'),
             get_total_stats
         )
 
@@ -186,12 +209,18 @@ class DashboardView(LoginRequiredMixin, StaffRequiredMixin, TemplateView):
             get_course_lifecycle_stats
         )
 
+        dashboard_last_updated = cache.get_cached_stats(
+            cache.get_cache_key('dashboard_last_updated_v1'),
+            timezone.now
+        )
+
         context.update({
             'course_stats': course_stats,
             'country_stats': country_stats,
             'yearly_stats': yearly_stats,
             **total_stats,
             **course_lifecycle_stats,
+            'dashboard_last_updated': dashboard_last_updated,
             'platform_name': configuration_helpers.get_value('PLATFORM_NAME', settings.PLATFORM_NAME),
         })
 
