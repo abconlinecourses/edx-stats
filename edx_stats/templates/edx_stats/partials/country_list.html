@@ -11,9 +11,9 @@
             <tbody>
                 {% for country in countries %}
                 <tr>
-                    <td>{{ country.country_name }}</td>
-                    <td>{{ country.country }}</td>
-                    <td>{{ country.user_count }}</td>
+                    <td>{{ country.country_name|default:country.country }}</td>
+                    <td class="code-cell">{{ country.country }}</td>
+                    <td class="metric-cell">{{ country.user_count }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

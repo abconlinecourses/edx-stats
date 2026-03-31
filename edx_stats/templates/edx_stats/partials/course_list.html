@@ -12,8 +12,8 @@
                 {% for course in courses %}
                 <tr>
                     <td>{{ course.display_name }}</td>
-                    <td><small class="text-muted">{{ course.course_id }}</small></td>
-                    <td>{{ course.enrollment_count }}</td>
+                    <td class="code-cell">{{ course.id }}</td>
+                    <td class="metric-cell">{{ course.enrollment_count }}</td>
                 </tr>
                 {% endfor %}
             </tbody>

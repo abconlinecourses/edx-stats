@@ -1,18 +1,81 @@
-<div class="col-md-4">
+<div class="col-12 col-sm-6 col-xl-4">
     <div class="card stats-card">
+        <div class="stats-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M4 19h16"/><path d="M6 17V9"/><path d="M12 17V5"/><path d="M18 17v-6"/></svg>
+        </div>
         <div class="stats-number">{{ total_courses|default:"0" }}</div>
         <div class="stats-label">Total Courses</div>
     </div>
 </div>
-<div class="col-md-4">
+<div class="col-12 col-sm-6 col-xl-4">
     <div class="card stats-card">
+        <div class="stats-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M3 7h18"/><path d="M6 3v4"/><path d="M18 3v4"/><rect x="3" y="7" width="18" height="14" rx="2"/></svg>
+        </div>
         <div class="stats-number">{{ total_enrollments|default:"0" }}</div>
         <div class="stats-label">Total Enrollments</div>
     </div>
 </div>
-<div class="col-md-4">
+<div class="col-12 col-sm-6 col-xl-4">
     <div class="card stats-card">
+        <div class="stats-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        </div>
         <div class="stats-number">{{ total_users|default:"0" }}</div>
         <div class="stats-label">Total Users</div>
+    </div>
+</div>
+<div class="col-12 col-sm-6 col-xl-4">
+    <div class="card stats-card">
+        <div class="stats-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18"/><path d="M12 3a14 14 0 0 0 0 18"/></svg>
+        </div>
+        <div class="stats-number">{{ total_countries|default:"0" }}</div>
+        <div class="stats-label">Countries Reached</div>
+    </div>
+</div>
+<div class="col-12 col-sm-6 col-xl-4">
+    <div class="card stats-card">
+        <div class="stats-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 9h10"/><path d="M7 13h6"/></svg>
+        </div>
+        <div class="stats-number">{{ running_programs|default:"0" }}</div>
+        <div class="stats-label">Running Programs</div>
+    </div>
+</div>
+<div class="col-12 col-sm-6 col-xl-4">
+    <div class="card stats-card">
+        <div class="stats-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3 3 8l9 5 9-5-9-5z"/><path d="M3 13l9 5 9-5"/><path d="M3 18l9 5 9-5"/></svg>
+        </div>
+        <div class="stats-number">{{ total_partners|default:"0" }}</div>
+        <div class="stats-label">Partners</div>
+    </div>
+</div>
+<div class="col-12 col-sm-6 col-xl-4">
+    <div class="card stats-card">
+        <div class="stats-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 2v20"/><path d="M5 9h14"/><path d="M5 15h14"/></svg>
+        </div>
+        <div class="stats-number">{{ is_upcoming|default:"0" }}</div>
+        <div class="stats-label">Upcoming Courses</div>
+    </div>
+</div>
+<div class="col-12 col-sm-6 col-xl-4">
+    <div class="card stats-card">
+        <div class="stats-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+        </div>
+        <div class="stats-number">{{ is_ongoing|default:"0" }}</div>
+        <div class="stats-label">Ongoing Courses</div>
+    </div>
+</div>
+<div class="col-12 col-sm-6 col-xl-4">
+    <div class="card stats-card">
+        <div class="stats-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+        </div>
+        <div class="stats-number">{{ is_finished|default:"0" }}</div>
+        <div class="stats-label">Finished Courses</div>
     </div>
 </div>
